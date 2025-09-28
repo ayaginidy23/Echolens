@@ -23,6 +23,18 @@
             <h2 class="text-4xl font-bold text-center text-gray-800 mb-12 animate-on-scroll">
                 {{ 'أرسل لنا رسالة' if lang == 'ar' else 'Send Us a Message' }}
             </h2>
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="max-w-lg mx-auto mb-6">
+                        {% for category, message in messages %}
+                            <div class="p-4 mb-4 rounded-lg text-center {{ 'bg-green-100 text-green-800' if category == 'success' else 'bg-red-100 text-red-800' }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
             <!-- Contact Form Card -->
             <div class="max-w-lg mx-auto bg-white rounded-xl shadow-xl p-8 transition-all duration-300 hover:shadow-2xl animate-on-scroll">
                 <div class="flex items-center justify-center mb-6">
@@ -112,7 +124,7 @@
                     <h3 class="text-lg font-semibold text-gray-800 mb-2">
                         {{ 'البريد الإلكتروني' if lang == 'ar' else 'Email' }}
                     </h3>
-                    <p class="text-gray-600">support@echolens.com</p>
+                    <p class="text-gray-600">ahmeddawood0001@gmail.com</p>
                 </div>
                 <!-- Phone -->
                 <div class="bg-white rounded-xl shadow-lg p-6 text-center transition-all duration-300 hover:shadow-xl hover:scale-105 animate-on-scroll">

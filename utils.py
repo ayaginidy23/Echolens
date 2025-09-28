@@ -275,7 +275,7 @@ def classify_video(video_path, model, labels):
 def generate_descriptions_and_summary(video_path="significant_keyframes_output.mp4", output_dir="frames", predicted_label=None, confidence=None):
     # Configure the generative AI model
     genai.configure(api_key="AIzaSyCvfIk15FUy-YUuC1hLlfOsf9_J4XoLAGw")
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    model = genai.GenerativeModel("gemini-2.5-flash")
     print("Model Loaded Successfully")
 
     # Check if the video file exists

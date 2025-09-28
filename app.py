@@ -45,6 +45,8 @@ app.config['EMAIL_PORT'] = 587
 app.config['EMAIL_HOST_USER'] = os.getenv('EMAIL_HOST_USER')
 app.config['EMAIL_HOST_PASSWORD'] = os.getenv('EMAIL_HOST_PASSWORD')
 app.config['EMAIL_USE_TLS'] = True
+app.config['SMTP_EMAIL'] = os.getenv('SMTP_EMAIL')  # Add SMTP_EMAIL to app.config
+
 
 # Ensure upload and output directories exist
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -235,6 +237,7 @@ def features():
     lang = request.args.get('lang', 'en')
     return render_template('features.html', lang=lang)
 
+
 @main_bp.route('/contact', methods=['GET', 'POST'])
 def contact():
     lang = request.args.get('lang', 'en')
@@ -246,26 +249,36 @@ def contact():
         if not name or not email or not message:
             error_message = 'جميع الحقول مطلوبة!' if lang == 'ar' else 'All fields are required!'
             flash(error_message, 'error')
+            logger.error("Contact form submission failed: Missing required fields (name: %s, email: %s, message: %s)", name, email, message)
             return redirect(url_for('main.contact', lang=lang))
 
         msg = MIMEMultipart()
-        msg['From'] = app.config['EMAIL_HOST_USER']
-        msg['To'] = app.config['EMAIL_HOST_USER']
-        msg['Subject'] = f"New Contact Form Submission from {name}"
+        msg['From'] = f"{app.config['EMAIL_HOST_USER']}"  # Use your email as the actual sender
+        msg['To'] = app.config['SMTP_EMAIL']  # To your email
+        msg['Reply-To'] = email  # Ensure replies go to the user
+        msg['Subject'] = f"New Contact Form Submission from {name} ({email})"  # Include user's email in subject
         body = f"Name: {name}\nEmail: {email}\nMessage: {message}"
         msg.attach(MIMEText(body, 'plain'))
 
         try:
+            logger.info("Attempting to send email from %s to %s (Reply-To: %s)", app.config['EMAIL_HOST_USER'], app.config['SMTP_EMAIL'], email)
             server = smtplib.SMTP(app.config['EMAIL_HOST'], app.config['EMAIL_PORT'])
+            server.set_debuglevel(1)  # Enable SMTP debug output
             server.starttls()
             server.login(app.config['EMAIL_HOST_USER'], app.config['EMAIL_HOST_PASSWORD'])
-            server.sendmail(app.config['EMAIL_HOST_USER'], app.config['EMAIL_HOST_USER'], msg.as_string())
+            server.sendmail(app.config['EMAIL_HOST_USER'], app.config['SMTP_EMAIL'], msg.as_string())
             server.quit()
             success_message = 'شكرًا على رسالتك! سنتواصل معك قريبًا.' if lang == 'ar' else 'Thank you for your message! We will get back to you soon.'
             flash(success_message, 'success')
+            logger.info("Email sent successfully to %s", app.config['SMTP_EMAIL'])
+        except smtplib.SMTPAuthenticationError as e:
+            error_message = 'فشل تسجيل الدخول إلى خادم البريد. تحقق من إعدادات البريد.' if lang == 'ar' else 'Failed to authenticate with the mail server. Check email settings.'
+            flash(error_message, 'error')
+            logger.error("SMTP Authentication Error: %s", str(e))
         except Exception as e:
             error_message = f'خطأ في إرسال الرسالة: {str(e)}' if lang == 'ar' else f'Error sending message: {str(e)}'
             flash(error_message, 'error')
+            logger.error("Failed to send email: %s", str(e))
 
         return redirect(url_for('main.contact', lang=lang))
 
