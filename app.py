@@ -775,6 +775,7 @@ def download_report(source=None):
     # Check if PDF is already generated and exists
     pdf_path = session.get(pdf_key)
     if pdf_path and os.path.exists(pdf_path):
+        session.pop(pdf_key, None)
         try:
             response = send_file(
                 pdf_path,
@@ -795,6 +796,9 @@ def download_report(source=None):
     if not results:
         logger.error(f"download_report: No analysis results found in session for source {source}")
         return jsonify({'error': 'Analysis results not found'}), 404
+    session.pop(results_key, None)
+    session.pop(significant_keyframes_key, None)
+    session.pop(pdf_key, None)
 
     # Extract a keyframe image (optional, skip if path is invalid or extraction fails)
     keyframe_image_path = None
