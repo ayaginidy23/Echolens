@@ -3,11 +3,22 @@
     {{ 'اتصل بنا - EchoLens' if lang == 'ar' else 'Contact Us - EchoLens' }}
 {% endblock %}
 {% block content %}
+<style>
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    textarea:-webkit-autofill,
+    textarea:-webkit-autofill:hover,
+    textarea:-webkit-autofill:focus {
+        -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+        -webkit-text-fill-color: #000000 !important;
+    }
+</style>
     <!-- Hero Section -->
     <section class="relative h-96 bg-cover bg-center" style="background-image: url('{{ url_for('static', filename='images/hero-bg.jpg') }}');">
         <div class="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-400 opacity-70"></div>
         <div class="relative container mx-auto px-4 h-full flex flex-col justify-center items-center text-center text-white">
-            <h1 class="text-5xl font-bold mb-4 animate-typewriter">
+            <h1 class="text-5xl font-bold mb-4 animate-typewriter leading-[1.6] pb-3">
                 {{ 'تواصل مع EchoLens' if lang == 'ar' else 'Get in Touch with EchoLens' }}
             </h1>
             <p class="text-xl mb-6 animate-fade-in">
@@ -46,54 +57,71 @@
                     </h3>
                 </div>
                 <form method="POST" action="{{ url_for('main.contact', lang=lang) }}">
-                    <!-- Name -->
-                    <div class="mb-6">
-                        <label for="name" class="block text-gray-700 text-sm font-semibold mb-2">
-                            {{ 'الاسم' if lang == 'ar' else 'Name' }}
-                        </label>
-                        <div class="relative">
-                            <input type="text" id="name" name="name" required
-                                   class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                                   placeholder="{{ 'اسمك' if lang == 'ar' else 'Your Name' }}">
-                            <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                </svg>
-                            </span>
-                        </div>
+                <!-- Name -->
+                <div class="mb-6">
+                    <label for="name" class="block text-gray-700 text-sm font-semibold mb-2">
+                        {{ 'الاسم' if lang == 'ar' else 'Name' }}
+                    </label>
+                    <div class="relative">
+                        <input type="text" id="name" name="name" required
+                            class="w-full p-3 rounded-xl border 
+                                placeholder-gray-400
+                                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                                transition-all duration-300
+                                border-gray-300 shadow-sm hover:shadow-md"
+                            style="background-color: white !important; color: black !important;"
+                            placeholder="{{ 'اسمك' if lang == 'ar' else 'Your Name' }}">
+                        <span class="absolute inset-y-0 {{ 'left-0 pl-3' if lang == 'ar' else 'right-0 pr-3' }} flex items-center text-gray-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                        </span>
                     </div>
-                    <!-- Email -->
-                    <div class="mb-6">
-                        <label for="email" class="block text-gray-700 text-sm font-semibold mb-2">
-                            {{ 'البريد الإلكتروني' if lang == 'ar' else 'Email' }}
-                        </label>
-                        <div class="relative">
-                            <input type="email" id="email" name="email" required
-                                   class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                                   placeholder="{{ 'بريدك.الإلكتروني@مثال.com' if lang == 'ar' else 'your.email@example.com' }}">
-                            <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
-                                </svg>
-                            </span>
-                        </div>
+                </div>
+
+                <!-- Email -->
+                <div class="mb-6">
+                    <label for="email" class="block text-gray-700 text-sm font-semibold mb-2">
+                        {{ 'البريد الإلكتروني' if lang == 'ar' else 'Email' }}
+                    </label>
+                    <div class="relative">
+                        <input type="email" id="email" name="email" required
+                            class="w-full p-3 rounded-xl border 
+                                placeholder-gray-400
+                                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                                transition-all duration-300
+                                border-gray-300 shadow-sm hover:shadow-md"
+                            style="background-color: white !important; color: black !important;"
+                            placeholder="{{ 'بريدك.الإلكتروني@مثال.com' if lang == 'ar' else 'your.email@example.com' }}">
+                        <span class="absolute inset-y-0 {{ 'left-0 pl-3' if lang == 'ar' else 'right-0 pr-3' }} flex items-center text-gray-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
+                            </svg>
+                        </span>
                     </div>
-                    <!-- Message -->
-                    <div class="mb-6">
-                        <label for="message" class="block text-gray-700 text-sm font-semibold mb-2">
-                            {{ 'الرسالة' if lang == 'ar' else 'Message' }}
-                        </label>
-                        <div class="relative">
-                            <textarea id="message" name="message" required
-                                      class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                                      rows="5" placeholder="{{ 'رسالتك...' if lang == 'ar' else 'Your message...' }}"></textarea>
-                            <span class="absolute inset-y-0 right-0 flex items-start pt-3 pr-3 text-gray-400">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
-                                </svg>
-                            </span>
-                        </div>
+                </div>
+
+                <!-- Message -->
+                <div class="mb-6">
+                    <label for="message" class="block text-gray-700 text-sm font-semibold mb-2">
+                        {{ 'الرسالة' if lang == 'ar' else 'Message' }}
+                    </label>
+                    <div class="relative">
+                        <textarea id="message" name="message" required
+                                class="w-full p-3 rounded-xl border 
+                                placeholder-gray-400
+                                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                                transition-all duration-300
+                                border-gray-300 shadow-sm hover:shadow-md"
+                                style="background-color: white !important; color: black !important;"
+                                rows="5" placeholder="{{ 'رسالتك...' if lang == 'ar' else 'Your message...' }}"></textarea>
+                        <span class="absolute inset-y-0 {{ 'left-0 pl-3' if lang == 'ar' else 'right-0 pr-3' }} flex items-center text-gray-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                            </svg>
+                        </span>
                     </div>
+                </div>
                     <!-- Submit Button -->
                     <button type="submit"
                             class="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition-all duration-300 flex items-center justify-center space-x-2">

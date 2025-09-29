@@ -8,7 +8,7 @@
 <section class="relative h-96 bg-cover bg-center" style="background-image: url('{{ url_for('static', filename='images/hero-bg.jpg') }}');">
     <div class="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-400 opacity-70"></div>
     <div class="relative container mx-auto px-4 h-full flex flex-col justify-center items-center text-center text-white">
-        <h1 class="text-5xl font-bold mb-4 animate-typewriter">
+        <h1 class="text-5xl font-bold mb-4 animate-typewriter leading-[1.6] pb-3">
             {{ 'المراقبة المباشرة' if lang == 'ar' else 'Live Surveillance' }}
         </h1>
         <p class="text-xl mb-6 animate-fade-in">
@@ -77,20 +77,24 @@
                                 <span>{{ 'تحليل الفيديو' if lang == 'ar' else 'Analyze Video' }}</span>
                             </button>
 
-                            <!-- RTSP Input -->
-                            <div class="mt-4">
-                                <label for="rtspUrl" class="block text-sm font-medium text-gray-700">
-                                    {{ 'أدخل عنوان RTSP' if lang == 'ar' else 'Enter RTSP URL' }}
-                                </label>
-                                <input type="text" id="rtspUrl" placeholder="rtsp://example.com/stream" 
-                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                                <button id="analyzeRtspBtn" class="mt-2 bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-lg flex items-center justify-center space-x-2 transition-all duration-300">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                                    </svg>
-                                    <span>{{ 'تحليل تدفق RTSP' if lang == 'ar' else 'Analyze RTSP Stream' }}</span>
-                                </button>
-                            </div>
+                        <!-- RTSP Input -->
+                        <div class="mt-4">
+                            <label for="rtspUrl" class="block text-sm font-medium text-gray-700">
+                                {{ 'أدخل عنوان RTSP' if lang == 'ar' else 'Enter RTSP URL' }}
+                            </label>
+                            <input type="text" id="rtspUrl" placeholder="rtsp://example.com/stream" 
+                                class="w-full p-3 rounded-xl border 
+                                        placeholder-gray-400
+                                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                                        transition-all duration-300
+                                        border-gray-300 shadow-sm hover:shadow-md"
+                                style="background-color: white !important; color: black !important;">
+                            <button id="analyzeRtspBtn" class="mt-2 bg-purple-600 hover:bg-purple-700 text-white py-3 px-6 rounded-lg flex items-center justify-center space-x-2 transition-all duration-300">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                </svg>
+                                <span>{{ 'تحليل تدفق RTSP' if lang == 'ar' else 'Analyze RTSP Stream' }}</span>
+                            </button>
                         </div>
                         
                         <div class="bg-gray-100 p-4 rounded-lg">
