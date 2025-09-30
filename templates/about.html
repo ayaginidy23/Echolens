@@ -43,8 +43,8 @@
             <h3 class="text-4xl font-bold text-center text-gray-800 mb-12 animate-on-scroll">
                 {{ 'تعرف على فريقنا' if lang == 'ar' else 'Meet Our Team' }}
             </h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
-                <!-- Team Member 1 -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
+                <!-- Team Member 1: Ahmed Dawood -->
                 <div class="bg-white rounded-xl shadow-lg p-6 text-center transition-all duration-300 hover:shadow-xl hover:scale-105 animate-on-scroll">
                     <img src="{{ url_for('static', filename='images/ahmed-dawood.jpg') }}" alt="Ahmed Dawood" class="w-24 h-24 mx-auto mb-4 rounded-full object-contain object-top" onerror="this.src='{{ url_for('static', filename='images/placeholder.jpg') }}'">
                     <h4 class="text-xl font-semibold text-gray-800 mb-2">{{ 'أحمد داود' if lang == 'ar' else 'Ahmed Dawood' }}</h4>
@@ -62,7 +62,7 @@
                         </a>
                     </div>
                 </div>
-                <!-- Team Member 2 -->
+                <!-- Team Member 2: Amr Khaled -->
                 <div class="bg-white rounded-xl shadow-lg p-6 text-center transition-all duration-300 hover:shadow-xl hover:scale-105 animate-on-scroll">
                     <img src="{{ url_for('static', filename='images/amr-khaled.jpg') }}" alt="Amr Khaled" class="w-24 h-24 mx-auto mb-4 rounded-full object-contain object-top" onerror="this.src='{{ url_for('static', filename='images/placeholder.jpg') }}'">
                     <h4 class="text-xl font-semibold text-gray-800 mb-2">{{ 'عمرو خالد' if lang == 'ar' else 'Amr Khaled' }}</h4>
@@ -80,7 +80,7 @@
                         </a>
                     </div>
                 </div>
-                <!-- Team Member 3 -->
+                <!-- Team Member 3: Mohamed Elslmawy -->
                 <div class="bg-white rounded-xl shadow-lg p-6 text-center transition-all duration-300 hover:shadow-xl hover:scale-105 animate-on-scroll">
                     <img src="{{ url_for('static', filename='images/mohamed-elslmawy.jpg') }}" alt="Mohamed Elslmawy" class="w-24 h-24 mx-auto mb-4 rounded-full object-contain object-top" onerror="this.src='{{ url_for('static', filename='images/placeholder.jpg') }}'">
                     <h4 class="text-xl font-semibold text-gray-800 mb-2">{{ 'محمد السلماوي' if lang == 'ar' else 'Mohamed Elslmawy' }}</h4>
@@ -98,7 +98,25 @@
                         </a>
                     </div>
                 </div>
-                <!-- Team Member 4 -->
+                <!-- Team Member 4: Dr. Mohamed Abdel Rahman (Center) -->
+                <div class="bg-white rounded-xl shadow-lg p-6 text-center transition-all duration-300 hover:shadow-xl hover:scale-105 animate-on-scroll">
+                    <img src="{{ url_for('static', filename='images/1517471344717.jpeg') }}" alt="Mohamed Abdel Rahman" class="w-24 h-24 mx-auto mb-4 rounded-full object-contain object-top" onerror="this.src='{{ url_for('static', filename='images/placeholder.jpg') }}'">
+                    <h4 class="text-xl font-semibold text-gray-800 mb-2">{{ 'د. محمد عبد الرحمن' if lang == 'ar' else 'Dr. Mohamed Abdel Rahman' }}</h4>
+                    <p class="text-sm text-gray-500 mb-4">{{ 'أستاذ هندسة نظم الحاسوب - رؤية الكمبيوتر والذكاء الاصطناعي' if lang == 'ar' else 'Professor of Computer Systems Engineering - Computer Vision & AI' }}</p>
+                    <div class="inline-flex justify-center space-x-4 {{ 'space-x-reverse' if lang == 'ar' else '' }}">
+                        <a href="https://www.linkedin.com/in/mohamed-abdou-676b1747/" target="_blank" class="text-gray-500 hover:text-blue-600 transition-colors duration-300">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-1.337-.479-2.25-1.677-2.25-1.08 0-1.723.729-2.004 1.433-.104.252-.129.604-.129.917v5.504h-3v-11h3v1.485c.426-.645 1.186-1.568 2.884-1.568 2.114 0 3.926 1.387 3.926 4.368v6.715z"/>
+                            </svg>
+                        </a>
+                        <a href="https://github.com" target="_blank" class="text-gray-500 hover:text-blue-600 transition-colors duration-300">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.332-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                <!-- Team Member 5: Aya Tamer -->
                 <div class="bg-white rounded-xl shadow-lg p-6 text-center transition-all duration-300 hover:shadow-xl hover:scale-105 animate-on-scroll">
                     <img src="{{ url_for('static', filename='images/aya-tamer.jpg') }}" alt="Aya Tamer" class="w-24 h-24 mx-auto mb-4 rounded-full object-contain object-top" onerror="this.src='{{ url_for('static', filename='images/placeholder.jpg') }}'">
                     <h4 class="text-xl font-semibold text-gray-800 mb-2">{{ 'آية تامر' if lang == 'ar' else 'Aya Tamer' }}</h4>
@@ -116,18 +134,18 @@
                         </a>
                     </div>
                 </div>
-                <!-- Team Member 5 -->
+                <!-- Team Member 6: George Nashaat -->
                 <div class="bg-white rounded-xl shadow-lg p-6 text-center transition-all duration-300 hover:shadow-xl hover:scale-105 animate-on-scroll">
                     <img src="{{ url_for('static', filename='images/sarah-kamal.jpg') }}" alt="Sarah Kamal" class="w-24 h-24 mx-auto mb-4 rounded-full object-contain object-top" onerror="this.src='{{ url_for('static', filename='images/placeholder.jpg') }}'">
                     <h4 class="text-xl font-semibold text-gray-800 mb-2">{{ 'جورج نشات' if lang == 'ar' else 'George Nashaat' }}</h4>
                     <p class="text-sm text-gray-500 mb-4">{{ 'مهندس ذكاء اصطناعي' if lang == 'ar' else 'AI Engineer' }}</p>
                     <div class="inline-flex justify-center space-x-4 {{ 'space-x-reverse' if lang == 'ar' else '' }}">
-                        <a href="https://linkedin.com" target="_blank" class="text-gray-500 hover:text-blue-600 transition-colors duration-300">
+                        <a href="https://www.linkedin.com/in/george-nashaat-850301244?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" target="_blank" class="text-gray-500 hover:text-blue-600 transition-colors duration-300">
                             <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-1.337-.479-2.25-1.677-2.25-1.08 0-1.723.729-2.004 1.433-.104.252-.129.604-.129.917v5.504h-3v-11h3v1.485c.426-.645 1.186-1.568 2.884-1.568 2.114 0 3.926 1.387 3.926 4.368v6.715z"/>
                             </svg>
                         </a>
-                        <a href="https://github.com" target="_blank" class="text-gray-500 hover:text-blue-600 transition-colors duration-300">
+                        <a href="https://github.com/GeorgeOGo" target="_blank" class="text-gray-500 hover:text-blue-600 transition-colors duration-300">
                             <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.332-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
                             </svg>

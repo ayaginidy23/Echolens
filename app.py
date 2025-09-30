@@ -755,7 +755,7 @@ def download_raw_live():
                 logger.warning("download_raw_live: Failed to remove raw keyframes file %s: %s", raw_keyframes_path, str(e))
 
 @main_bp.route('/download_report/<source>')
-@main_bp.route('/download_report')  # Add this line to support query parameter
+@main_bp.route('/download_report')
 def download_report(source=None):
     if source is None:
         source = request.args.get('source')
@@ -772,30 +772,15 @@ def download_report(source=None):
         significant_keyframes_key = 'significant_keyframes_path_live'
         pdf_key = 'live_pdf_path'
 
-    # Check if PDF is already generated and exists
-    pdf_path = session.get(pdf_key)
-    if pdf_path and os.path.exists(pdf_path):
-        session.pop(pdf_key, None)
-        try:
-            response = send_file(
-                pdf_path,
-                as_attachment=True,
-                download_name=f'echolens_report_{source}.pdf',
-                mimetype='application/pdf'
-            )
-            logger.info(f"download_report: Served existing PDF report: {pdf_path}")
-            return response
-        except Exception as e:
-            logger.error(f"download_report: Error serving existing PDF: {str(e)}")
-            return jsonify({'error': f'Error serving report: {str(e)}'}), 500
-
-    # If no existing PDF, proceed with generation
+    # Get results from session
     results = session.get(results_key)
     significant_keyframes_path = session.get(significant_keyframes_key)
 
     if not results:
         logger.error(f"download_report: No analysis results found in session for source {source}")
         return jsonify({'error': 'Analysis results not found'}), 404
+
+    # Clear previous session data
     session.pop(results_key, None)
     session.pop(significant_keyframes_key, None)
     session.pop(pdf_key, None)
