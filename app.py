@@ -1,11 +1,14 @@
 import os
 import cv2
 import numpy as np
+import base64  # Added import for base64
+import requests
 from flask import Flask, request, jsonify, render_template, Blueprint, flash, redirect, url_for, send_file, session
 from werkzeug.utils import secure_filename
 from flask_socketio import SocketIO, emit
 import shutil
-from datetime import datetime
+import datetime
+from datetime import datetime as dt
 from dotenv import load_dotenv
 import smtplib
 from email.mime.text import MIMEText
@@ -17,7 +20,6 @@ from reportlab.lib import colors
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
-import datetime
 
 
 # Set up logging
@@ -293,38 +295,50 @@ def analysis():
 def upload_video():
     lang = request.args.get('lang', 'en')
     if 'video' not in request.files:
+        logger.error("upload_video: No video file provided in request")
         return jsonify({'error': 'لم يتم توفير ملف فيديو' if lang == 'ar' else 'No video file provided'}), 400
+    
     file = request.files['video']
     if file.filename == '':
+        logger.error("upload_video: No file selected")
         return jsonify({'error': 'لم يتم تحديد ملف' if lang == 'ar' else 'No file selected'}), 400
+    
     if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
+        timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')  # datetime.now()
+        filename = secure_filename(f"{timestamp}_{file.filename}")
         video_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(video_path)
+        logger.info("upload_video: Video saved at %s", video_path)
 
         # Get video duration
         video_duration = get_video_duration(video_path)
         if video_duration is None:
-            logger.error(f"upload_video: Could not calculate duration for video: {video_path}")
+            logger.error("upload_video: Could not calculate duration for video: %s", video_path)
             video_duration = 0.0
 
+        # Validate video
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
-            logger.error(f"upload_video: Could not open video file: {video_path}")
+            logger.error("upload_video: Could not open video file: %s", video_path)
+            os.remove(video_path)
             return jsonify({'error': 'فشل في فتح ملف الفيديو' if lang == 'ar' else 'Failed to open video file'}), 400
         
         ret, frame = cap.read()
         if not ret or frame is None:
             cap.release()
-            logger.error(f"upload_video: Could not read frames from video: {video_path}")
+            logger.error("upload_video: Could not read frames from video: %s", video_path)
+            os.remove(video_path)
             return jsonify({'error': 'فشل في قراءة الفريمات من الفيديو' if lang == 'ar' else 'Failed to read frames from video'}), 400
         cap.release()
 
-        output_video_preprocessed = os.path.join(app.config['OUTPUT_FOLDER'], "output_video_preprocessing.mp4")
-        output_video_raw = os.path.join(app.config['OUTPUT_FOLDER'], "keyframes_only_output.mp4")
-        output_video_annotated = os.path.join(app.config['OUTPUT_FOLDER'], "keyframes_annotated_output.mp4")
-        output_video_significant = os.path.join(app.config['OUTPUT_FOLDER'], "significant_keyframes_output.mp4")
-        frames_dir = os.path.join(app.config['OUTPUT_FOLDER'], "frames")
+        # Define output paths
+        output_video_preprocessed = os.path.join(app.config['OUTPUT_FOLDER'], f"preprocessed_{timestamp}.mp4")
+        output_video_raw = os.path.join(app.config['OUTPUT_FOLDER'], f"keyframes_only_{timestamp}.mp4")
+        output_video_annotated = os.path.join(app.config['OUTPUT_FOLDER'], f"keyframes_annotated_{timestamp}.mp4")
+        output_video_significant = os.path.join(app.config['OUTPUT_FOLDER'], f"significant_keyframes_{timestamp}.mp4")
+        frames_dir = os.path.join(app.config['OUTPUT_FOLDER'], f"frames_{timestamp}")
+        keyframe_image_path = os.path.join(app.config['OUTPUT_FOLDER'], f"keyframe_analysis_{timestamp}.jpg")
+        pdf_path = os.path.join(app.config['OUTPUT_FOLDER'], f"report_analysis_{timestamp}.pdf")
 
         try:
             logger.info("upload_video: Preprocessing video: %s", video_path)
@@ -338,7 +352,7 @@ def upload_video():
                 output_video_significant
             )
 
-            # Check if significant keyframes video was generated and has frames
+            # Check if significant keyframes video was generated
             cap = cv2.VideoCapture(output_video_significant)
             total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
             cap.release()
@@ -366,7 +380,7 @@ def upload_video():
             )
             logger.info("upload_video: After description generation - Corrected Label: %s, Corrected Confidence: %.2f", corrected_label, corrected_confidence)
 
-            # Ensure corrected_confidence is between 0 and 1 before converting to percentage
+            # Normalize confidence
             if corrected_confidence > 1.0:
                 logger.warning("upload_video: Corrected confidence %f exceeds 1.0, normalizing...", corrected_confidence)
                 corrected_confidence = corrected_confidence / 100.0
@@ -378,36 +392,89 @@ def upload_video():
             confidence_percentage = max(0.0, min(100.0, confidence_percentage))
             logger.info("upload_video: Final confidence percentage: %.2f", confidence_percentage)
 
+            # Extract keyframe image
+            if not extract_keyframe_image(output_video_significant, keyframe_image_path):
+                logger.warning("upload_video: Failed to extract keyframe image")
+                keyframe_image_path = None
+
+            # Generate PDF report
+            generate_pdf_report(
+                output_path=pdf_path,
+                predicted_label=corrected_label,
+                confidence=confidence_percentage,
+                summary=summary,
+                events=events,
+                video_duration=video_duration,
+                keyframe_path=keyframe_image_path
+            )
+            logger.info("upload_video: PDF report generated at %s", pdf_path)
+
+            # Convert PDF to Base64
+            pdf_base64 = ""
+            if os.path.exists(pdf_path):
+                with open(pdf_path, 'rb') as pdf_file:
+                    pdf_data = pdf_file.read()
+                    pdf_base64 = base64.b64encode(pdf_data).decode('utf-8')
+                logger.info("upload_video: PDF converted to Base64")
+            else:
+                logger.error("upload_video: PDF file not found at %s", pdf_path)
+
             # Store paths and results in session
             session['raw_keyframes_path_analysis'] = output_video_raw
             session['significant_keyframes_path_analysis'] = output_video_significant
+            session['analysis_pdf_path'] = pdf_path
             session['analysis_results'] = {
+                'id': timestamp,
                 'predicted_label': corrected_label,
                 'confidence': confidence_percentage,
                 'summary': summary,
                 'events': events,
                 'video_duration': video_duration
             }
-            logger.info("upload_video: Stored raw keyframes path in session: %s", output_video_raw)
-            logger.info("upload_video: Stored significant keyframes path in session: %s", output_video_significant)
+            logger.info("upload_video: Stored results in session with ID: %s", timestamp)
 
-            response = {
+            # Send webhook for non-normal events
+            webhook_url = 'https://ahmeddawood.app.n8n.cloud/webhook/a8a33bc7-7e97-49ec-a726-a1eb337d7a3f'
+            if corrected_label.lower() != 'normal':
+                webhook_payload = {
+                    'predicted_label': corrected_label,
+                    'summary': summary,
+                    'pdf_data': pdf_base64,
+                    'pdf_filename': f'analysis_report_{timestamp}.pdf'
+                }
+                logger.info("upload_video: Sending webhook payload: %s", webhook_payload)
+                try:
+                    webhook_response = requests.post(webhook_url, json=webhook_payload, headers={'Content-Type': 'application/json'})
+                    webhook_response.raise_for_status()
+                    logger.info("upload_video: Webhook sent successfully")
+                except requests.RequestException as e:
+                    logger.error("upload_video: Failed to send webhook: %s", str(e))
+            else:
+                logger.info("upload_video: Normal event detected, skipping webhook")
+
+            # Prepare response with cache-control headers
+            response = jsonify({
                 'predicted_label': corrected_label,
                 'confidence': confidence_percentage,
                 'summary': summary,
                 'events': events
-            }
-            return jsonify(response)
+            })
+            response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, proxy-revalidate'
+            response.headers['Pragma'] = 'no-cache'
+            response.headers['Expires'] = '0'
+            return response
 
         except Exception as e:
-            logger.error("upload_video: Error during video analysis: %s", str(e))
+            logger.error("upload_video: Error during video analysis: %s", str(e), exc_info=True)
             return jsonify({'error': f'خطأ أثناء تحليل الفيديو: {str(e)}' if lang == 'ar' else f'Error during video analysis: {str(e)}'}), 500
 
         finally:
-            # Clean up all files except the raw and significant keyframes videos
+            # Clean up temporary files
             paths_to_remove = [video_path, output_video_preprocessed, output_video_annotated]
+            if keyframe_image_path and os.path.exists(keyframe_image_path):
+                paths_to_remove.append(keyframe_image_path)
             for path in paths_to_remove:
-                if os.path.exists(path):
+                if path and os.path.exists(path):
                     try:
                         os.remove(path)
                         logger.info("upload_video: Removed temporary file: %s", path)
@@ -846,7 +913,6 @@ def download_report(source=None):
                     logger.info(f"download_report: Removed file: {path}")
                 except Exception as e:
                     logger.warning(f"download_report: Failed to remove file {path}: {str(e)}")
-        # Do not clear session variables here
 
 
 # Register blueprint

@@ -4,7 +4,7 @@
 {% endblock %}
 {% block content %}
     <!-- Hero Section -->
-    <section class="relative h-96 bg-cover bg-center" style="background-image: url('{{ url_for('static', filename='images/hero-bg.jpg') }}');">
+    <section class="relative h-96 bg-cover bg-center" style="background-image: url('{{ url_for('static', filename='img/hero-bg.jpg') }}');">
         <div class="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-400 opacity-70"></div>
         <div class="relative container mx-auto px-4 h-full flex flex-col justify-center items-center text-center text-white">
             <h1 class="text-5xl font-bold mb-4 animate-typewriter leading-[1.6] pb-3">
@@ -18,7 +18,7 @@
 
     <!-- Upload Section -->
     <section class="py-16 bg-gray-50 relative">
-        <div class="absolute inset-0 opacity-10" style="background-image: url('{{ url_for('static', filename='images/pattern.png') }}');"></div>
+        <div class="absolute inset-0 opacity-10" style="background-image: url('{{ url_for('static', filename='img/pattern.png') }}');"></div>
         <div class="container mx-auto px-4 relative">
             <!-- Flash Messages -->
             {% with messages = get_flashed_messages(with_categories=true) %}
@@ -180,15 +180,27 @@
     </section>
 
     <script>
+        let isUploading = false;
+        let lastClickTime = 0;
+        const DEBOUNCE_TIME = 1000; // 1 second debounce
+
         document.getElementById('uploadBtn').addEventListener('click', async () => {
+            const currentTime = Date.now();
+            if (isUploading || (currentTime - lastClickTime < DEBOUNCE_TIME)) {
+                console.log('Upload request ignored: already uploading or too soon after last click');
+                return;
+            }
+            isUploading = true;
+            lastClickTime = currentTime;
+
             const videoInput = document.getElementById('video');
-            const lang = '{{ lang }}'; // Get the language from the template
+            const lang = '{{ lang }}';
             const alertBar = document.getElementById('alertBar');
             const alertAudio = new Audio('{{ url_for('static', filename='audio/alert.mp3') }}');
-            const webhookUrl = 'https://ahmeddawood.app.n8n.cloud/webhook/a8a33bc7-7e97-49ec-a726-a1eb337d7a3f';
 
             if (!videoInput.files.length) {
                 alert(lang === 'ar' ? 'يرجى اختيار ملف فيديو.' : 'Please select a video file.');
+                isUploading = false;
                 return;
             }
 
@@ -198,7 +210,7 @@
 
             document.getElementById('loading').classList.remove('hidden');
             document.getElementById('results').classList.add('hidden');
-            alertBar.classList.add('hidden'); // Hide alert bar initially
+            alertBar.classList.add('hidden');
 
             // Simulate progress bar
             const progressBar = document.getElementById('progressBar');
@@ -219,7 +231,7 @@
                 progressBar.style.width = '100%';
 
                 const result = await response.json();
-                console.log('Full analysis result:', result); // Log full result for debugging
+                console.log('Full analysis result:', result);
                 if (response.ok) {
                     // Display Predicted Event and Confidence
                     document.getElementById('predictedLabel').textContent = result.predicted_label || (lang === 'ar' ? 'غير معروف' : 'Unknown');
@@ -229,71 +241,20 @@
                     if (!result.predicted_label || !result.summary) {
                         console.warn('Invalid result data:', result);
                         alert(lang === 'ar' ? 'بيانات التحليل غير كاملة.' : 'Analysis data is incomplete.');
+                        isUploading = false;
                         return;
                     }
 
                     // Show alert bar and play audio if predicted_label is not 'normal'
                     if (result.predicted_label && result.predicted_label.toLowerCase() !== 'normal') {
-                        console.log('Non-normal event detected, triggering alert and webhook:', result.predicted_label);
+                        console.log('Non-normal event detected, triggering alert:', result.predicted_label);
                         alertBar.classList.remove('hidden');
                         alertAudio.play().catch(error => {
                             console.error('Error playing alert audio:', error);
                             alert(`${lang === 'ar' ? 'خطأ في تشغيل صوت التنبيه: ' : 'Error playing alert audio: '}${error.message}`);
                         });
-
-                        // Fetch the PDF as binary data with error handling
-                        let pdfBlob, pdfArrayBuffer, pdfBase64;
-                        try {
-                            const pdfResponse = await fetch('/download_report/analysis', { // Change to match the route
-                                method: 'GET',
-                                headers: {
-                                    'Accept': 'application/pdf'
-                                }
-                            });
-                            if (!pdfResponse.ok) {
-                                throw new Error(`Failed to fetch PDF: ${pdfResponse.status} ${pdfResponse.statusText}`);
-                            }
-                            pdfBlob = await pdfResponse.blob();
-                            pdfArrayBuffer = await pdfBlob.arrayBuffer();
-                            pdfBase64 = btoa(String.fromCharCode(...new Uint8Array(pdfArrayBuffer)));
-                        } catch (pdfError) {
-                            console.error('PDF fetch error:', pdfError);
-                            alert(`${lang === 'ar' ? 'خطأ في جلب ملف الـ PDF: ' : 'Error fetching PDF: '}${pdfError.message}`);
-                            pdfBase64 = ''; // Set empty if failed
-                        }
-
-                        // Prepare webhook payload with predicted_label, summary, and PDF as base64
-                        const webhookPayload = {
-                            predicted_label: result.predicted_label,
-                            summary: result.summary,
-                            pdf_data: pdfBase64,
-                            pdf_filename: 'analysis_report.pdf'
-                        };
-
-                        // Send to webhook with detailed error handling
-                        try {
-                            console.log('Attempting webhook request...');
-                            const webhookResponse = await fetch(webhookUrl, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify(webhookPayload)
-                            });
-                            console.log('Webhook response status:', webhookResponse.status);
-                            if (!webhookResponse.ok) {
-                                const webhookError = await webhookResponse.json();
-                                console.error('Webhook error:', webhookError);
-                                alert(`${lang === 'ar' ? 'خطأ في إرسال البيانات إلى الـ Webhook: ' : 'Error sending data to webhook: '}${webhookError.message || 'Unknown error'}`);
-                            } else {
-                                console.log('Webhook sent successfully');
-                            }
-                        } catch (webhookError) {
-                            console.error('Error in webhook request:', webhookError);
-                            alert(`${lang === 'ar' ? 'خطأ في معالجة الـ Webhook: ' : 'Error processing webhook: '}${webhookError.message}`);
-                        }
                     } else {
-                        console.log('Normal event detected, skipping webhook. Label:', result.predicted_label);
+                        console.log('Normal event detected, skipping alert. Label:', result.predicted_label);
                     }
 
                     // Display Event Summary
@@ -335,6 +296,7 @@
             } finally {
                 document.getElementById('loading').classList.add('hidden');
                 progressBar.style.width = '0%';
+                isUploading = false;
             }
         });
     </script>
