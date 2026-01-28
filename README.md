@@ -1,5 +1,6 @@
 # 📹 ECHOLENS  
-Smart AI-Powered Surveillance System – Real-time Event Detection & Reporting  
+Smart AI-Powered Surveillance System – Real-time Event Detection & Reporting 
+
 Team Member : Ahmed Dawood - Amr Khaled - Aya Ginidy - George Nashaat - Mohamed Elslmawy
 ---
 
